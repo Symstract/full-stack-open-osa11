@@ -41,12 +41,10 @@ jobs:
     needs: [simple_deployment_pipeline]
     runs-on: ubuntu-latest
     steps:
-      - name: Grant file system access
-        run: export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
+      - uses: actions/checkout@v6
       - name: Bump version and push tag
         if: ${{ github.event_name == 'push' }}
         uses: anothrNick/github-tag-action@1.75.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
-          DRY_RUN: true

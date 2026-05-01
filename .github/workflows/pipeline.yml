@@ -40,9 +40,9 @@ jobs:
   tag_release:
     needs: [simple_deployment_pipeline]
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
+      - name: Grant file system access
+        run: export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
       - name: Bump version and push tag
         if: ${{ github.event_name == 'push' }}
         uses: anothrNick/github-tag-action@1.75.0

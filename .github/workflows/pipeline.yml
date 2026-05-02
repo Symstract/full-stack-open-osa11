@@ -9,7 +9,7 @@ on:
     types: [opened, synchronize]
 
 jobs:
-  simple_deployment_pipeline:
+  build_and_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -34,20 +34,28 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
+  deploy:
+    if: ${{ github.event_name == 'push' && !contains('#skip', join(github.event.commits.*.message)) }}
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    steps:
       - name: Trigger deployment
-        if: ${{ github.event_name == 'push' && !contains('#skip', join(github.event.commits.*.message)) }}
         run: curl ${{ secrets.RENDER_DEPLOY_HOOK }}
+  notify_status:
+    needs: [build_and_test, deploy]
+    if: ${{ !cancelled() && github.event_name == 'push' && !contains('#skip', join(github.event.commits.*.message)) }}
+    runs-on: ubuntu-latest
+    steps:
       - uses: sarisia/actions-status-discord@v1
-        if: ${{ !cancelled() && github.event_name == 'push' && !contains('#skip', join(github.event.commits.*.message)) }}
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK }}
   tag_release:
-    needs: [simple_deployment_pipeline]
+    if: ${{ github.event_name == 'push' && !contains('#skip', join(github.event.commits.*.message)) }}
+    needs: [build_and_test, deploy]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - name: Bump version and push tag
-        if: ${{ github.event_name == 'push' && !contains('#skip', join(github.event.commits.*.message)) }}
         uses: anothrNick/github-tag-action@1.75.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

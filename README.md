@@ -1,4 +1,5 @@
-**Link:** https://full-stack-open-osa11.onrender.com/
+**Website:** https://full-stack-open-osa11.onrender.com/
+**Own pipeline repository:** https://github.com/Symstract/full-stack-open-osa11-anecdotes-cicd
 
 # Full Stack open CI/CD
 
